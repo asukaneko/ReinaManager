@@ -358,9 +358,16 @@
 		"activityTitle": "动态",
 		"addedAt": "添加时间: {{time}}",
 		"lastPlayed": "最后游玩: {{time}}",
+		"cloudBadge": "云端",
+		"emptyActivity": "暂无动态",
+		"emptyRecentAdded": "暂无最近添加",
+		"emptyRecentPlayed": "暂无游玩记录",
+		"libraryCards": "仓库卡片",
+		"localBadge": "本地",
 		"recentlyAdded": "最近添加",
 		"recentlyPlayed": "最近游玩",
 		"repository": "游戏仓库",
+		"repositorySummary": "共 {{count}} 个游戏 · {{local}} 个本地 · {{completed}} 个通关",
 		"stats": {
 			"completedGames": "通关游戏数",
 			"localGames": "本地游戏数",
@@ -372,7 +379,10 @@
 			"totalPlayTime": "总游戏时长",
 			"weekPlayTime": "本周游戏时长"
 		},
-		"title": "主页"
+		"title": "主页",
+		"titleSummary": "仓库中共有 {{count}} 个游戏",
+		"viewAll": "查看全部",
+		"viewLibrary": "查看仓库"
 	},
 	"pages": {
 		"Collection": {

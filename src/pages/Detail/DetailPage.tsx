@@ -23,6 +23,8 @@ import SearchIcon from "@mui/icons-material/Search";
 import {
 	Box,
 	Button,
+	Card,
+	CardContent,
 	Chip,
 	CircularProgress,
 	Stack,
@@ -70,7 +72,7 @@ const TabPanel = (props: TabPanelProps) => {
 			aria-labelledby={`game-tab-${index}`}
 			{...other}
 		>
-			{value === index && <Box sx={{ pt: 3 }}>{children}</Box>}
+			{value === index && <Box className="p-4 sm:p-5">{children}</Box>}
 		</div>
 	);
 };
@@ -82,6 +84,9 @@ function formatScoreValue(value: number | null | undefined) {
 function hasRating(value: number | null | undefined) {
 	return typeof value === "number" && value > 0;
 }
+
+const detailCardClass =
+	"border border-solid border-[--mui-palette-divider] shadow-sm";
 
 /**
  * Detail 组件
@@ -259,237 +264,251 @@ export const Detail: React.FC = () => {
 			breadcrumbs={breadcrumbs}
 			sx={{ maxWidth: "100% !important" }}
 		>
-			<Box className="p-2">
+			<Box className="p-2 flex flex-col gap-4">
 				{/* 顶部区域：图片和基本信息 */}
-				<Stack direction={{ xs: "column", md: "row" }} spacing={3}>
-					{/* 左侧：游戏图片 */}
-					<Box>
-						<img
-							src={getGameCover(selectedGame)}
-							loading="lazy"
-							alt={getGameDisplayName(selectedGame)}
-							className="max-h-65 max-w-40 lg:max-w-80 rounded-lg shadow-lg select-none"
-							onDragStart={(event) => event.preventDefault()}
-						/>
-					</Box>
-					{/* 右侧：游戏信息 */}
-					<Box className="flex-1">
+				<Card className={`overflow-hidden ${detailCardClass}`}>
+					<CardContent className="!p-4 sm:!p-5">
 						<Stack
-							direction={{ xs: "column", sm: "row" }}
-							className="flex flex-wrap [&>div]:mr-6 [&>div]:mb-2"
+							direction={{ xs: "column", md: "row" }}
+							spacing={3}
+							className="items-start"
 						>
-							{selectedGame.id_type === "custom" ? (
-								<Box>
-									<Typography
-										variant="subtitle2"
-										fontWeight="bold"
-										component="div"
-									>
-										{t("pages.Detail.gameDatafrom", "数据来源")}
-									</Typography>
-									<Typography component="div">Custom</Typography>
-								</Box>
-							) : (
-								<Box>
-									<Typography
-										variant="subtitle2"
-										fontWeight="bold"
-										component="div"
-									>
-										{t("pages.Detail.gameDatafrom", "数据来源")}
-									</Typography>
-									<Typography component="div">
-										{selectedGame.id_type}
-									</Typography>
-								</Box>
-							)}
-							<Box>
-								<Typography
-									variant="subtitle2"
-									fontWeight="bold"
-									component="div"
-								>
-									{t("pages.Detail.gameDeveloper", "开发")}
-								</Typography>
-								<Box className="flex flex-wrap items-center">
-									{developerChips.length > 0 ? (
-										developerChips
+							{/* 左侧：游戏图片 */}
+							<Box className="w-full shrink-0 md:w-72 lg:w-80">
+								<img
+									src={getGameCover(selectedGame)}
+									loading="lazy"
+									alt={getGameDisplayName(selectedGame)}
+									className="max-h-[320px] w-full rounded-3 object-contain shadow-lg select-none"
+									onDragStart={(event) => event.preventDefault()}
+								/>
+							</Box>
+							{/* 右侧：游戏信息 */}
+							<Box className="min-w-0 flex-1">
+								<Box className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6 [&>div]:min-w-0 [&>div]:rounded-3 [&>div]:bg-[--mui-palette-action-hover] [&>div]:px-3 [&>div]:py-2">
+									{selectedGame.id_type === "custom" ? (
+										<Box>
+											<Typography
+												variant="subtitle2"
+												fontWeight="bold"
+												component="div"
+											>
+												{t("pages.Detail.gameDatafrom", "数据来源")}
+											</Typography>
+											<Typography component="div">Custom</Typography>
+										</Box>
 									) : (
-										<Typography component="div">-</Typography>
+										<Box>
+											<Typography
+												variant="subtitle2"
+												fontWeight="bold"
+												component="div"
+											>
+												{t("pages.Detail.gameDatafrom", "数据来源")}
+											</Typography>
+											<Typography component="div">
+												{selectedGame.id_type}
+											</Typography>
+										</Box>
+									)}
+									<Box>
+										<Typography
+											variant="subtitle2"
+											fontWeight="bold"
+											component="div"
+										>
+											{t("pages.Detail.gameDeveloper", "开发")}
+										</Typography>
+										<Box className="flex flex-wrap items-center">
+											{developerChips.length > 0 ? (
+												developerChips
+											) : (
+												<Typography component="div">-</Typography>
+											)}
+										</Box>
+									</Box>
+									<Box>
+										<Typography
+											variant="subtitle2"
+											fontWeight="bold"
+											component="div"
+										>
+											{t("pages.Detail.releaseDate", "发布时间")}
+										</Typography>
+										<Typography component="div">
+											{selectedGame.date || "-"}
+										</Typography>
+									</Box>
+									<Box>
+										<Typography
+											variant="subtitle2"
+											fontWeight="bold"
+											component="div"
+										>
+											{t("pages.Detail.addTime", "添加时间")}
+										</Typography>
+										<Typography component="div">
+											{selectedGame.created_at
+												? new Date(
+														selectedGame.created_at * 1000,
+													).toLocaleDateString()
+												: "-"}
+										</Typography>
+									</Box>
+									{typeof selectedGame.rank === "number" &&
+										selectedGame.rank > 0 && (
+										<Box>
+											<Typography
+												variant="subtitle2"
+												fontWeight="bold"
+												component="div"
+											>
+												{t("pages.Detail.gameRanking", "游戏排行")}
+											</Typography>
+											<Typography component="div">{selectedGame.rank}</Typography>
+										</Box>
+									)}
+									{selectedGame.average_hours !== 0 &&
+										selectedGame.average_hours && (
+											<Box>
+												<Typography
+													variant="subtitle2"
+													fontWeight="bold"
+													component="div"
+												>
+													{t("pages.Detail.expected_hours", "预计时长")}
+												</Typography>
+												<Typography component="div">
+													{selectedGame.average_hours || "-"}h
+												</Typography>
+											</Box>
+										)}
+									{(hasRating(selectedGame.score) ||
+										hasRating(selectedGame.custom_data?.user_rating)) && (
+										<Box>
+											<Typography
+												variant="subtitle2"
+												fontWeight="bold"
+												component="div"
+											>
+												{t("pages.Detail.score", "评分")}
+											</Typography>
+											<Stack direction="row" spacing={0.75} className="flex-wrap">
+												{hasRating(selectedGame.score) && (
+													<Chip
+														size="small"
+														variant="outlined"
+														label={`${t("pages.Detail.siteScore", "站点")} ${formatScoreValue(selectedGame.score)}`}
+													/>
+												)}
+												{hasRating(selectedGame.custom_data?.user_rating) && (
+													<Chip
+														size="small"
+														color="primary"
+														variant="outlined"
+														label={`${t("pages.Detail.myScore", "我的")} ${formatScoreValue(selectedGame.custom_data?.user_rating)}`}
+													/>
+												)}
+											</Stack>
+										</Box>
+									)}
+								</Box>
+								{/* 标签 */}
+								<Box className="mt-4 rounded-3 border border-solid border-[--mui-palette-divider] p-3">
+									<Box className="mb-2 flex flex-wrap items-center gap-2">
+										<Typography
+											variant="subtitle2"
+											fontWeight="bold"
+											component="div"
+										>
+											{t("pages.Detail.gameTags", "游戏标签")}
+										</Typography>
+										<Button
+											size="small"
+											variant="text"
+											startIcon={<SearchIcon />}
+											disabled={selectedTags.length === 0}
+											onClick={handleSearchByTags}
+										>
+											{t("pages.Detail.searchBySelectedTags", {
+												count: selectedTags.length,
+												defaultValue: "搜索",
+											})}
+										</Button>
+										<Button
+											size="small"
+											variant="text"
+											color="inherit"
+											startIcon={<ClearIcon />}
+											disabled={selectedTags.length === 0}
+											onClick={handleClearSelectedTags}
+										>
+											{t("pages.Detail.clearSelectedTags", "清空")}
+										</Button>
+									</Box>
+									<Stack
+										direction="row"
+										className="max-h-34 overflow-y-auto pr-1 flex-wrap gap-1"
+									>
+										{(selectedGame.tags || [])
+											.slice(0, showAllTags ? undefined : 40) // 根据折叠状态显示标签数量
+											.map((tag) => (
+												<Chip
+													key={tag}
+													label={getTagDisplayName(tag, tagTranslation)}
+													size="small"
+													color={
+														selectedTags.includes(tag) ? "primary" : "default"
+													}
+													variant="outlined"
+													onClick={() => handleTagClick(tag)}
+													sx={
+														selectedTags.includes(tag)
+															? {
+																	backgroundColor: "primary.main",
+																	color: "primary.contrastText",
+																	"&&:hover": {
+																		backgroundColor: "primary.dark",
+																	},
+																}
+															: {}
+													}
+												/>
+											))}
+									</Stack>
+									{selectedGame.tags && selectedGame.tags.length > 40 && (
+										<Typography
+											variant="body2"
+											color="primary"
+											sx={{ cursor: "pointer", mt: 1 }}
+											component={"span"}
+											onClick={handleToggleTags}
+										>
+											{showAllTags
+												? t("pages.Detail.collapseTags", "折叠标签")
+												: t("pages.Detail.expandTags", "展开标签")}
+										</Typography>
 									)}
 								</Box>
 							</Box>
-							<Box>
-								<Typography
-									variant="subtitle2"
-									fontWeight="bold"
-									component="div"
-								>
-									{t("pages.Detail.releaseDate", "发布时间")}
-								</Typography>
-								<Typography component="div">
-									{selectedGame.date || "-"}
-								</Typography>
-							</Box>
-							<Box>
-								<Typography
-									variant="subtitle2"
-									fontWeight="bold"
-									component="div"
-								>
-									{t("pages.Detail.addTime", "添加时间")}
-								</Typography>
-								<Typography component="div">
-									{selectedGame.created_at
-										? new Date(
-												selectedGame.created_at * 1000,
-											).toLocaleDateString()
-										: "-"}
-								</Typography>
-							</Box>
-							{selectedGame.average_hours !== 0 &&
-								selectedGame.average_hours && (
-									<Box>
-										<Typography
-											variant="subtitle2"
-											fontWeight="bold"
-											component="div"
-										>
-											{t("pages.Detail.expected_hours", "预计时长")}
-										</Typography>
-										<Typography component="div">
-											{selectedGame.average_hours || "-"}h
-										</Typography>
-									</Box>
-								)}
-							{typeof selectedGame.rank === "number" &&
-								selectedGame.rank > 0 && (
-									<Box>
-										<Typography
-											variant="subtitle2"
-											fontWeight="bold"
-											component="div"
-										>
-											{t("pages.Detail.gameRanking", "游戏排行")}
-										</Typography>
-										<Typography component="div">{selectedGame.rank}</Typography>
-									</Box>
-								)}
-							{(hasRating(selectedGame.score) ||
-								hasRating(selectedGame.custom_data?.user_rating)) && (
-								<Box>
-									<Typography
-										variant="subtitle2"
-										fontWeight="bold"
-										component="div"
-									>
-										{t("pages.Detail.score", "评分")}
-									</Typography>
-									<Stack direction="row" spacing={0.75} className="flex-wrap">
-										{hasRating(selectedGame.score) && (
-											<Chip
-												size="small"
-												variant="outlined"
-												label={`${t("pages.Detail.siteScore", "站点")} ${formatScoreValue(selectedGame.score)}`}
-											/>
-										)}
-										{hasRating(selectedGame.custom_data?.user_rating) && (
-											<Chip
-												size="small"
-												color="primary"
-												variant="outlined"
-												label={`${t("pages.Detail.myScore", "我的")} ${formatScoreValue(selectedGame.custom_data?.user_rating)}`}
-											/>
-										)}
-									</Stack>
-								</Box>
-							)}
 						</Stack>
-						{/* 标签 */}
-						<Box className="mt-2">
-							<Box className="flex items-center gap-2 mb-1">
-								<Typography
-									variant="subtitle2"
-									fontWeight="bold"
-									component="div"
-								>
-									{t("pages.Detail.gameTags", "游戏标签")}
-								</Typography>
-								<Button
-									size="small"
-									variant="text"
-									startIcon={<SearchIcon />}
-									disabled={selectedTags.length === 0}
-									onClick={handleSearchByTags}
-								>
-									{t("pages.Detail.searchBySelectedTags", "搜索 ({{count}})", {
-										count: selectedTags.length,
-									})}
-								</Button>
-								<Button
-									size="small"
-									variant="text"
-									color="inherit"
-									startIcon={<ClearIcon />}
-									disabled={selectedTags.length === 0}
-									onClick={handleClearSelectedTags}
-								>
-									{t("pages.Detail.clearSelectedTags", "清空")}
-								</Button>
-							</Box>
-							<Stack direction="row" className="flex-wrap gap-1">
-								{(selectedGame.tags || [])
-									.slice(0, showAllTags ? undefined : 40) // 根据折叠状态显示标签数量
-									.map((tag) => (
-										<Chip
-											key={tag}
-											label={getTagDisplayName(tag, tagTranslation)}
-											size="small"
-											color={selectedTags.includes(tag) ? "primary" : "default"}
-											variant="outlined"
-											onClick={() => handleTagClick(tag)}
-											sx={
-												selectedTags.includes(tag)
-													? {
-															backgroundColor: "primary.main",
-															color: "primary.contrastText",
-															"&&:hover": {
-																backgroundColor: "primary.dark",
-															},
-														}
-													: {}
-											}
-										/>
-									))}
-							</Stack>
-							{selectedGame.tags && selectedGame.tags.length > 40 && (
-								<Typography
-									variant="body2"
-									color="primary"
-									sx={{ cursor: "pointer", mt: 1 }}
-									component={"span"}
-									onClick={handleToggleTags}
-								>
-									{showAllTags
-										? t("pages.Detail.collapseTags", "折叠标签")
-										: t("pages.Detail.expandTags", "展开标签")}
-								</Typography>
-							)}
-						</Box>
-					</Box>
-				</Stack>
+					</CardContent>
+				</Card>
 
 				{/* 添加Tabs组件 */}
-				<Box sx={{ width: "100%" }}>
+				<Card className={`overflow-hidden ${detailCardClass}`}>
 					<Box
 						sx={{ borderBottom: 1, borderColor: "divider" }}
-						className="flex items-center gap-2"
+						className="flex flex-wrap items-center gap-2 px-3 sm:px-4"
 					>
 						<Tabs
 							value={tabIndex}
 							onChange={handleTabChange}
 							aria-label="game detail tabs"
 							className="flex-1 min-w-0"
+							variant="scrollable"
+							scrollButtons="auto"
+							allowScrollButtonsMobile
 						>
 							<Tab
 								label={t("pages.Detail.gameStats", "游戏统计")}
@@ -552,7 +571,7 @@ export const Detail: React.FC = () => {
 					<TabPanel value={tabIndex} index={4}>
 						{tabIndex === 4 && <Review selectedGame={selectedGame} />}
 					</TabPanel>
-				</Box>
+				</Card>
 				<CollectionPickerDialog
 					open={collectionDialogOpen}
 					mode="manage"

@@ -516,9 +516,14 @@ export const GameStatsOverview: React.FC<GameStatsOverviewProps> = ({
 									area: chartConfig.showArea,
 								},
 							]}
-							height={300}
+							height={320}
 							margin={{ right: 40 }}
-							grid={{ vertical: true, horizontal: true }}
+							grid={{ vertical: false, horizontal: false }}
+							sx={{
+								"& .MuiChartsAxis-line, & .MuiChartsAxis-tick": {
+									stroke: "var(--mui-palette-divider)",
+								},
+							}}
 						/>
 					) : (
 						<Box className="min-h-[300px]">

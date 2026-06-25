@@ -358,9 +358,16 @@
 		"activityTitle": "アクティビティ",
 		"addedAt": "追加時間: {{time}}",
 		"lastPlayed": "最終プレイ: {{time}}",
+		"cloudBadge": "クラウド",
+		"emptyActivity": "アクティビティはまだありません",
+		"emptyRecentAdded": "最近追加したゲームはありません",
+		"emptyRecentPlayed": "プレイ記録はまだありません",
+		"libraryCards": "ライブラリカード",
+		"localBadge": "ローカル",
 		"recentlyAdded": "最近追加したゲーム",
 		"recentlyPlayed": "最近プレイしたゲーム",
 		"repository": "ゲームリポジトリ",
+		"repositorySummary": "{{count}}本のゲーム · ローカル{{local}}本 · クリア{{completed}}本",
 		"stats": {
 			"completedGames": "クリアしたゲーム数",
 			"localGames": "ローカルゲーム数",
@@ -372,7 +379,10 @@
 			"totalPlayTime": "総プレイ時間",
 			"weekPlayTime": "今週のプレイ時間"
 		},
-		"title": "ホーム"
+		"title": "ホーム",
+		"titleSummary": "ライブラリに{{count}}本のゲームがあります",
+		"viewAll": "すべて表示",
+		"viewLibrary": "ライブラリを開く"
 	},
 	"pages": {
 		"Collection": {
