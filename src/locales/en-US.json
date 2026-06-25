@@ -370,9 +370,16 @@
 		"activityTitle": "Activity",
 		"addedAt": "Added at: {{time}}",
 		"lastPlayed": "Last played: {{time}}",
+		"cloudBadge": "Cloud",
+		"emptyActivity": "No activity yet",
+		"emptyRecentAdded": "No recently added games",
+		"emptyRecentPlayed": "No play sessions yet",
+		"libraryCards": "Library Cards",
+		"localBadge": "Local",
 		"recentlyAdded": "Recently Added",
 		"recentlyPlayed": "Recently Played",
 		"repository": "Game Repository",
+		"repositorySummary": "{{count}} games · {{local}} local · {{completed}} completed",
 		"stats": {
 			"completedGames": "Completed Games",
 			"localGames": "Local Games",
@@ -384,7 +391,10 @@
 			"totalPlayTime": "Total Play Time",
 			"weekPlayTime": "Weekly Play Time"
 		},
-		"title": "Home"
+		"title": "Home",
+		"titleSummary": "{{count}} games in your library",
+		"viewAll": "View all",
+		"viewLibrary": "Open Library"
 	},
 	"pages": {
 		"Collection": {

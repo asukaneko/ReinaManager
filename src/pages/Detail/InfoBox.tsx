@@ -307,24 +307,28 @@ export const InfoBox: React.FC<InfoBoxProps> = ({ gameID }: InfoBoxProps) => {
 	return (
 		<>
 			{/* 统计信息卡片 */}
-			<Box className="mb-4">
-				<div className="grid grid-cols-4 gap-4">
+			<Box className="mb-5">
+				<div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
 					{statItems.map((item) => (
-						<Box key={item.title} className="p-4 overflow-hidden">
-							<div className="flex items-center space-x-2 mb-2">
-								<span className="text-[#1976d2] flex-shrink-0 flex items-center">
+						<Box
+							key={item.title}
+							className="overflow-hidden rounded-3 border border-solid border-[--mui-palette-divider] bg-[--mui-palette-action-hover] p-4"
+						>
+							<div className="mb-3 flex items-center gap-2">
+								<span className="h-9 w-9 flex-shrink-0 flex items-center justify-center rounded-2 bg-[--mui-palette-background-paper] text-[#1976d2]">
 									{item.icon}
 								</span>
 								<Typography
 									variant="body2"
-									className="font-medium text-gray-600 truncate"
+									color="text.secondary"
+									className="truncate font-medium"
 									title={item.title}
 									component="span"
 								>
 									{item.title}
 								</Typography>
 							</div>
-							<Typography variant="h6" className="font-bold" component="div">
+							<Typography variant="h5" className="font-bold" component="div">
 								{item.value}
 							</Typography>
 						</Box>
@@ -333,12 +337,12 @@ export const InfoBox: React.FC<InfoBoxProps> = ({ gameID }: InfoBoxProps) => {
 			</Box>
 			{/* 游玩时长折线图 */}
 			{chartData.length > 0 && (
-				<Box>
-					<Box className="flex items-center justify-between mb-4">
+				<Box className="rounded-3 border border-solid border-[--mui-palette-divider] p-4">
+					<Box className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 						<Typography variant="h6" fontWeight="bold" component="div">
 							{t("pages.Detail.playTimeChart", "统计图表")}
 						</Typography>
-						<Box className="flex items-center gap-2">
+						<Box className="flex flex-wrap items-center gap-2">
 							{/* 月份选择器 - 仅在MONTH模式下显示 */}
 							{timeRange === "MONTH" && (
 								<Box className="flex items-center gap-1 mr-2">
@@ -424,9 +428,14 @@ export const InfoBox: React.FC<InfoBoxProps> = ({ gameID }: InfoBoxProps) => {
 								area: chartConfig.showArea,
 							},
 						]}
-						height={300}
+						height={320}
 						margin={{ right: 40 }}
-						grid={{ vertical: true, horizontal: true }}
+						grid={{ vertical: false, horizontal: false }}
+						sx={{
+							"& .MuiChartsAxis-line, & .MuiChartsAxis-tick": {
+								stroke: "var(--mui-palette-divider)",
+							},
+						}}
 					/>
 				</Box>
 			)}

@@ -358,9 +358,16 @@
 		"activityTitle": "動態",
 		"addedAt": "添加時間: {{time}}",
 		"lastPlayed": "最後遊玩: {{time}}",
+		"cloudBadge": "雲端",
+		"emptyActivity": "暫無動態",
+		"emptyRecentAdded": "暫無最近添加",
+		"emptyRecentPlayed": "暫無遊玩記錄",
+		"libraryCards": "倉庫卡片",
+		"localBadge": "本地",
 		"recentlyAdded": "最近添加",
 		"recentlyPlayed": "最近遊玩",
 		"repository": "遊戲倉庫",
+		"repositorySummary": "共 {{count}} 個遊戲 · {{local}} 個本地 · {{completed}} 個通關",
 		"stats": {
 			"completedGames": "通關遊戲數",
 			"localGames": "本地遊戲數",
@@ -372,7 +379,10 @@
 			"totalPlayTime": "總遊戲時長",
 			"weekPlayTime": "本週遊戲時長"
 		},
-		"title": "首頁"
+		"title": "首頁",
+		"titleSummary": "倉庫中共有 {{count}} 個遊戲",
+		"viewAll": "查看全部",
+		"viewLibrary": "查看倉庫"
 	},
 	"pages": {
 		"Collection": {
