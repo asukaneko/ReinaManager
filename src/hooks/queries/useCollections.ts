@@ -16,6 +16,8 @@ export const collectionKeys = {
 		[...collectionKeys.all, "gameCategories", gameId] as const,
 	groupCounts: (groupIds: number[]) =>
 		[...collectionKeys.all, "groupCounts", groupIds] as const,
+	groupCardInfo: (groupIds: number[]) =>
+		[...collectionKeys.all, "groupCardInfo", groupIds] as const,
 };
 
 function useGroups() {
@@ -29,6 +31,14 @@ function useGroupGameCounts(groupIds: number[]) {
 	return useQuery({
 		queryKey: collectionKeys.groupCounts(groupIds),
 		queryFn: () => collectionService.batchCountGamesInGroups(groupIds),
+		enabled: groupIds.length > 0,
+	});
+}
+
+function useGroupCardInfo(groupIds: number[]) {
+	return useQuery({
+		queryKey: collectionKeys.groupCardInfo(groupIds),
+		queryFn: () => collectionService.batchGetGroupCardInfo(groupIds),
 		enabled: groupIds.length > 0,
 	});
 }
@@ -151,6 +161,23 @@ function useRenameGroup() {
 			collectionService.updateCollection(groupId, newName),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: collectionKeys.groups() });
+		},
+	});
+}
+
+function useUpdateCollectionCover() {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({
+			collectionId,
+			icon,
+		}: {
+			collectionId: number;
+			icon: string | null;
+		}) => collectionService.updateCollectionCover(collectionId, icon),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: collectionKeys.all });
 		},
 	});
 }
@@ -339,6 +366,7 @@ export {
 	useDeleteCategory,
 	useDeleteGroup,
 	useGameCategoryIds,
+	useGroupCardInfo,
 	useGroupGameCounts,
 	useGroups,
 	useRemoveGamesFromCategory,
@@ -346,4 +374,5 @@ export {
 	useRenameGroup,
 	useSetGameCategories,
 	useUpdateCategoryGames,
+	useUpdateCollectionCover,
 };
