@@ -158,15 +158,17 @@ fn scan_and_copy_custom_covers(
 
         let dir_name = entry.file_name().to_string_lossy().to_string();
 
-        // 只处理 game_{id} 格式的目录
-        let game_id_str = match dir_name.strip_prefix("game_") {
+        let item_id_str = match dir_name
+            .strip_prefix("game_")
+            .or_else(|| dir_name.strip_prefix("collection_"))
+        {
             Some(id) => id,
             None => continue,
         };
 
         // 自定义封面文件名格式：cover_{game_id}_{ext}_{timestamp}.{ext}
-        let expected_prefix = format!("cover_{}", game_id_str);
-        let mut game_has_covers = false;
+        let expected_prefix = format!("cover_{}", item_id_str);
+        let mut dir_has_covers = false;
 
         let file_entries = fs::read_dir(&entry_path)
             .map_err(|e| format!("无法读取游戏封面目录 {}: {}", dir_name, e))?;
@@ -190,12 +192,11 @@ fn scan_and_copy_custom_covers(
                 continue;
             }
 
-            // 首次为该游戏创建目录
-            if !game_has_covers {
-                let game_temp_dir = temp_dir.join(&dir_name);
-                fs::create_dir_all(&game_temp_dir)
+            if !dir_has_covers {
+                let cover_temp_dir = temp_dir.join(&dir_name);
+                fs::create_dir_all(&cover_temp_dir)
                     .map_err(|e| format!("创建临时目录失败: {}", e))?;
-                game_has_covers = true;
+                dir_has_covers = true;
             }
 
             let target_path = temp_dir.join(&dir_name).join(&file_name);
@@ -203,7 +204,7 @@ fn scan_and_copy_custom_covers(
                 .map_err(|e| format!("复制自定义封面文件失败 {}: {}", file_name, e))?;
         }
 
-        if game_has_covers {
+        if dir_has_covers {
             *has_covers = true;
         }
     }

@@ -6,7 +6,7 @@ use crate::database::dto::{
     UpdateGameData, UpdateSettingsData,
 };
 use crate::database::repository::{
-    collections_repository::{CategoryWithCount, CollectionsRepository},
+    collections_repository::{CategoryWithCount, CollectionsRepository, GroupCardInfo},
     game_stats_repository::{DailyStats, GameLastPlayed, GameStatsRepository},
     games_repository::{GameType, GamesRepository, SortOption, SortOrder},
     settings_repository::SettingsRepository,
@@ -491,6 +491,18 @@ pub async fn update_collection(
         .map_err(|e| format!("更新合集失败: {}", e))
 }
 
+/// 更新合集封面
+#[tauri::command]
+pub async fn update_collection_icon(
+    db: State<'_, DatabaseConnection>,
+    id: i32,
+    icon: Option<String>,
+) -> Result<crate::entity::collections::Model, String> {
+    CollectionsRepository::update_icon(&db, id, icon)
+        .await
+        .map_err(|e| format!("Failed to update collection cover: {}", e))
+}
+
 /// 删除合集
 #[tauri::command]
 pub async fn delete_collection(db: State<'_, DatabaseConnection>, id: i32) -> Result<u64, String> {
@@ -580,6 +592,17 @@ pub async fn batch_count_games_in_groups(
     CollectionsRepository::batch_count_games_in_groups(&db, group_ids)
         .await
         .map_err(|e| format!("批量获取分组游戏数量失败: {}", e))
+}
+
+/// 批量获取分组卡片信息
+#[tauri::command]
+pub async fn batch_get_group_card_info(
+    db: State<'_, DatabaseConnection>,
+    group_ids: Vec<i32>,
+) -> Result<std::collections::HashMap<i32, GroupCardInfo>, String> {
+    CollectionsRepository::batch_get_group_card_info(&db, group_ids)
+        .await
+        .map_err(|e| format!("Failed to get group card info: {}", e))
 }
 
 /// 获取分组中的游戏总数

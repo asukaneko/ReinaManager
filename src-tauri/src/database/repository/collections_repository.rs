@@ -15,6 +15,13 @@ pub struct CategoryWithCount {
     pub icon: Option<String>,
     pub sort_order: i32,
     pub game_count: u64,
+    pub first_game_id: Option<i32>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct GroupCardInfo {
+    pub game_count: u64,
+    pub first_game_id: Option<i32>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -309,6 +316,23 @@ impl CollectionsRepository {
         active.update(db).await
     }
 
+    pub async fn update_icon(
+        db: &DatabaseConnection,
+        id: i32,
+        icon: Option<String>,
+    ) -> Result<collections::Model, DbErr> {
+        let existing = Collections::find_by_id(id)
+            .one(db)
+            .await?
+            .ok_or(DbErr::RecordNotFound("Collection not found".to_string()))?;
+
+        let mut active: collections::ActiveModel = existing.into();
+        active.icon = Set(icon.filter(|value| !value.trim().is_empty()));
+        active.updated_at = Set(Some(chrono::Utc::now().timestamp() as i32));
+
+        active.update(db).await
+    }
+
     /// 删除合集（会级联删除子合集和游戏关联）
     pub async fn delete(db: &DatabaseConnection, id: i32) -> Result<DeleteResult, DbErr> {
         Collections::delete_by_id(id).exec(db).await
@@ -504,6 +528,100 @@ impl CollectionsRepository {
         Ok(result)
     }
 
+    pub async fn batch_get_group_card_info(
+        db: &DatabaseConnection,
+        group_ids: Vec<i32>,
+    ) -> Result<std::collections::HashMap<i32, GroupCardInfo>, DbErr> {
+        use std::collections::HashMap;
+
+        if group_ids.is_empty() {
+            return Ok(HashMap::new());
+        }
+
+        let mut result = group_ids
+            .iter()
+            .copied()
+            .map(|group_id| {
+                (
+                    group_id,
+                    GroupCardInfo {
+                        game_count: 0,
+                        first_game_id: None,
+                    },
+                )
+            })
+            .collect::<HashMap<_, _>>();
+
+        let counts = Collections::find()
+            .filter(collections::Column::ParentId.is_in(group_ids.clone()))
+            .join(
+                JoinType::InnerJoin,
+                collections::Relation::GameCollectionLink.def(),
+            )
+            .select_only()
+            .column(collections::Column::ParentId)
+            .column_as(
+                Expr::col(game_collection_link::Column::GameId).count_distinct(),
+                "game_count",
+            )
+            .group_by(collections::Column::ParentId)
+            .into_tuple::<(Option<i32>, i64)>()
+            .all(db)
+            .await?;
+
+        for (group_id, count) in counts {
+            if let Some(group_id) = group_id
+                && let Some(info) = result.get_mut(&group_id)
+            {
+                info.game_count = count as u64;
+            }
+        }
+
+        let categories = Collections::find()
+            .filter(collections::Column::ParentId.is_in(group_ids.clone()))
+            .order_by_asc(collections::Column::ParentId)
+            .order_by_asc(collections::Column::SortOrder)
+            .all(db)
+            .await?;
+
+        if categories.is_empty() {
+            return Ok(result);
+        }
+
+        let category_ids = categories
+            .iter()
+            .map(|category| category.id)
+            .collect::<Vec<_>>();
+
+        let first_links = GameCollectionLink::find()
+            .filter(game_collection_link::Column::CollectionId.is_in(category_ids))
+            .order_by_asc(game_collection_link::Column::CollectionId)
+            .order_by_asc(game_collection_link::Column::SortOrder)
+            .all(db)
+            .await?
+            .into_iter()
+            .fold(HashMap::<i32, i32>::new(), |mut acc, link| {
+                acc.entry(link.collection_id).or_insert(link.game_id);
+                acc
+            });
+
+        for category in categories {
+            let Some(group_id) = category.parent_id else {
+                continue;
+            };
+            let Some(first_game_id) = first_links.get(&category.id) else {
+                continue;
+            };
+            if let Some(info) = result.get_mut(&group_id)
+                && info.first_game_id.is_none()
+            {
+                info.first_game_id = Some(*first_game_id);
+            }
+        }
+
+        Ok(result)
+    }
+
     /// 获取单个分组中的游戏总数（统计该分组下所有分类的游戏数）
     ///
     /// 注意：如果需要获取多个分组的游戏数，请使用 batch_count_games_in_groups
@@ -560,6 +678,22 @@ impl CollectionsRepository {
             .map(|(collection_id, count)| (collection_id, count as u64))
             .collect::<HashMap<_, _>>();
 
+        let category_ids = categories
+            .iter()
+            .map(|category| category.id)
+            .collect::<Vec<_>>();
+        let first_game_ids = GameCollectionLink::find()
+            .filter(game_collection_link::Column::CollectionId.is_in(category_ids))
+            .order_by_asc(game_collection_link::Column::CollectionId)
+            .order_by_asc(game_collection_link::Column::SortOrder)
+            .all(db)
+            .await?
+            .into_iter()
+            .fold(HashMap::<i32, i32>::new(), |mut acc, link| {
+                acc.entry(link.collection_id).or_insert(link.game_id);
+                acc
+            });
+
         Ok(categories
             .into_iter()
             .map(|category| CategoryWithCount {
@@ -568,6 +702,7 @@ impl CollectionsRepository {
                 icon: category.icon,
                 sort_order: category.sort_order,
                 game_count: counts.get(&category.id).copied().unwrap_or(0),
+                first_game_id: first_game_ids.get(&category.id).copied(),
             })
             .collect())
     }

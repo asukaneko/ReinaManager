@@ -8,6 +8,8 @@
 
 import DriveFileRenameOutlineIcon from "@mui/icons-material/DriveFileRenameOutline";
 import EditIcon from "@mui/icons-material/Edit";
+import ImageIcon from "@mui/icons-material/Image";
+import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import { ListItemIcon, ListItemText, MenuItem, MenuList } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { BaseRightMenu } from "./BaseRightMenu";
@@ -25,6 +27,9 @@ interface CollectionRightMenuProps {
 	target: CollectionRightMenuTarget;
 	onOpenRename: () => void; // 打开重命名对话框的回调
 	onOpenManageGames?: () => void; // 打开管理游戏对话框的回调（仅分类）
+	onSetCover?: () => void;
+	onResetCover?: () => void;
+	hasCustomCover?: boolean;
 }
 
 /**
@@ -41,6 +46,9 @@ export const CollectionRightMenu: React.FC<CollectionRightMenuProps> = ({
 	target,
 	onOpenRename,
 	onOpenManageGames,
+	onSetCover,
+	onResetCover,
+	hasCustomCover = false,
 }) => {
 	const { t } = useTranslation();
 
@@ -66,6 +74,34 @@ export const CollectionRightMenu: React.FC<CollectionRightMenuProps> = ({
 							primary={t(
 								"components.RightMenu.Collection.manageGames",
 								"管理游戏",
+							)}
+						/>
+					</MenuItem>
+				)}
+
+				{onSetCover && (
+					<MenuItem onClick={onSetCover}>
+						<ListItemIcon>
+							<ImageIcon />
+						</ListItemIcon>
+						<ListItemText
+							primary={t(
+								"components.RightMenu.Collection.setCover",
+								"设置封面",
+							)}
+						/>
+					</MenuItem>
+				)}
+
+				{hasCustomCover && onResetCover && (
+					<MenuItem onClick={onResetCover}>
+						<ListItemIcon>
+							<RestartAltIcon />
+						</ListItemIcon>
+						<ListItemText
+							primary={t(
+								"components.RightMenu.Collection.resetCover",
+								"恢复默认封面",
 							)}
 						/>
 					</MenuItem>

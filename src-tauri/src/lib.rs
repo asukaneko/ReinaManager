@@ -120,6 +120,7 @@ pub fn run() {
             create_collection,
             find_root_collections,
             update_collection,
+            update_collection_icon,
             delete_collection,
             remove_games_from_collection,
             get_games_in_collection,
@@ -128,6 +129,7 @@ pub fn run() {
             set_game_collections,
             update_category_games,
             batch_count_games_in_groups,
+            batch_get_group_card_info,
             count_games_in_group,
             get_categories_with_count,
         ])

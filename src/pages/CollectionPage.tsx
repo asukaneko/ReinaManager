@@ -28,36 +28,59 @@ import {
 	useScrollRestore,
 	useVirtuosoGridRestore,
 } from "@/hooks/common/useScrollRestore";
-import { useVirtualCategories } from "@/hooks/common/useVirtualCollections";
+import {
+	getDeveloperCategoryGameIds,
+	useVirtualCategories,
+} from "@/hooks/common/useVirtualCollections";
 import { useGameIndex } from "@/hooks/features/games/useGameListFacade";
 import {
 	useCategories,
 	useCategoryGames,
 	useDeleteCategory,
 	useDeleteGroup,
-	useGroupGameCounts,
+	useGroupCardInfo,
 	useGroups,
 	useRenameCategory,
 	useRenameGroup,
+	useUpdateCollectionCover,
 } from "@/hooks/queries/useCollections";
 import { snackbar } from "@/providers/snackBar";
+import {
+	deleteCollectionCustomCover,
+	resolveCollectionCover,
+	selectCollectionCoverFile,
+	uploadSelectedCollectionCover,
+} from "@/services/collection/cover";
 import { type SelectedCategory, useStore } from "@/store/appStore";
 import type { Category as CategoryType } from "@/types/collection";
 import { DefaultGroup } from "@/types/collection";
 import { getUserErrorMessage } from "@/utils/errors";
+import { getGameCover, getGameNsfwStatus } from "@/utils/game";
 
 const SCROLL_CONTAINER_SELECTOR = "main";
-const CATEGORY_WIDE_BREAKPOINT = 1200;
+const CATEGORY_GRID_BREAKPOINTS = [
+	{ min: 2560, cols: 10 },
+	{ min: 1920, cols: 9 },
+	{ min: 1536, cols: 8 },
+	{ min: 1280, cols: 7 },
+	{ min: 1024, cols: 6 },
+] as const;
 const CATEGORY_GRID_TEMPLATE_COLUMNS = {
-	md: "repeat(3, 1fr)",
-	lg: "repeat(4, 1fr)",
+	xs: "repeat(2, minmax(0, 1fr))",
+	sm: "repeat(3, minmax(0, 1fr))",
+	md: "repeat(4, minmax(0, 1fr))",
+	lg: "repeat(6, minmax(0, 1fr))",
+	xl: "repeat(7, minmax(0, 1fr))",
 };
 
 const getScrollContainer = () =>
 	document.querySelector<HTMLElement>(SCROLL_CONTAINER_SELECTOR);
 
 function getCategoryColumnCount(): number {
-	return window.innerWidth >= CATEGORY_WIDE_BREAKPOINT ? 4 : 3;
+	for (const breakpoint of CATEGORY_GRID_BREAKPOINTS) {
+		if (window.innerWidth >= breakpoint.min) return breakpoint.cols;
+	}
+	return 3;
 }
 
 function useCategoryColumnCount(): number {
@@ -84,6 +107,7 @@ type CollectionMenuPosition =
 			type: "group";
 			id: string;
 			name: string;
+			icon?: string | null;
 	  }
 	| {
 			mouseX: number;
@@ -91,11 +115,12 @@ type CollectionMenuPosition =
 			type: "category";
 			id: number;
 			name: string;
+			icon?: string | null;
 	  };
 
 type CollectionMenuTarget =
-	| { type: "group"; id: string; name: string }
-	| { type: "category"; id: number; name: string };
+	| { type: "group"; id: string; name: string; icon?: string | null }
+	| { type: "category"; id: number; name: string; icon?: string | null };
 
 interface DeveloperCategoryGridProps {
 	categories: CategoryType[];
@@ -104,7 +129,7 @@ interface DeveloperCategoryGridProps {
 	scrollKey: string | null;
 }
 
-const DEVELOPER_CATEGORY_GRID_ROW_HEIGHT = 112;
+const DEVELOPER_CATEGORY_GRID_ROW_HEIGHT = 420;
 const DEVELOPER_CATEGORY_GRID_CLASS =
 	"grid gap-4 pb-4 [grid-template-columns:repeat(var(--collection-category-columns),minmax(0,1fr))]";
 
@@ -135,7 +160,7 @@ function DeveloperCategoryGrid({
 							: `missing-category-${index}`
 					}
 					listClassName={DEVELOPER_CATEGORY_GRID_CLASS}
-					itemClassName="min-w-0 h-112px"
+					itemClassName="min-w-0"
 					increaseViewportBy={{ top: 400, bottom: 800 }}
 					stateChanged={stateChanged}
 					{...restoreProps}
@@ -163,12 +188,14 @@ export const Collection: React.FC = () => {
 		setSelectedCategory,
 		setCurrentGroup,
 		selectedCategory,
+		nsfwCoverReplace,
 	} = useStore(
 		useShallow((s) => ({
 			currentGroupId: s.currentGroupId,
 			setSelectedCategory: s.setSelectedCategory,
 			setCurrentGroup: s.setCurrentGroup,
 			selectedCategory: s.selectedCategory,
+			nsfwCoverReplace: s.nsfwCoverReplace,
 		})),
 	);
 	const { index: gameIndex } = useGameIndex();
@@ -182,27 +209,17 @@ export const Collection: React.FC = () => {
 	const categoryGamesQuery = useCategoryGames(selectedCategory, gameIndex);
 	const categoryGames = categoryGamesQuery.data;
 	const groupIds = useMemo(() => groups.map((group) => group.id), [groups]);
-	const groupGameCountsQuery = useGroupGameCounts(groupIds);
+	const groupCardInfoQuery = useGroupCardInfo(groupIds);
 	const deleteCategoryMutation = useDeleteCategory();
 	const deleteGroupMutation = useDeleteGroup();
 	const renameGroupMutation = useRenameGroup();
 	const renameCategoryMutation = useRenameCategory();
+	const updateCollectionCoverMutation = useUpdateCollectionCover();
 
 	// 使用统一的虚拟分类 Hook
 	const virtualCategories = useVirtualCategories(gameIndex);
 
-	const groupGameCounts = useMemo(() => {
-		const counts = new Map<string, number>();
-		counts.set(DefaultGroup.DEVELOPER, displayAllGames.length);
-
-		for (const [groupId, count] of Object.entries(
-			groupGameCountsQuery.data ?? {},
-		)) {
-			counts.set(groupId, count);
-		}
-
-		return counts;
-	}, [displayAllGames.length, groupGameCountsQuery.data]);
+	const groupCardInfo = groupCardInfoQuery.data ?? {};
 
 	// 统一的右键菜单状态管理
 	const [menuPosition, setMenuPosition] =
@@ -216,6 +233,92 @@ export const Collection: React.FC = () => {
 	);
 	const levelScrollMapRef = useRef<Record<string, number>>({});
 	const navIntentRef = useRef<CollectionScrollNavIntent>(null);
+
+	const getCollectionIdFromTarget = (
+		target: CollectionMenuTarget,
+	): number | null => {
+		if (target.type === "category") return target.id;
+		const groupId = Number.parseInt(target.id, 10);
+		return Number.isNaN(groupId) ? null : groupId;
+	};
+
+	const getGameCoverUrl = (gameId?: number | null): string | null => {
+		if (!gameId) return null;
+		const game = gameIndex.displayById.get(gameId);
+		if (!game) return null;
+		return nsfwCoverReplace && getGameNsfwStatus(game)
+			? "/images/NR18.png"
+			: getGameCover(game);
+	};
+
+	const getCollectionCoverUrl = (
+		collectionId: number,
+		icon?: string | null,
+		fallbackGameId?: number | null,
+	): string | null => {
+		return (
+			resolveCollectionCover(collectionId, icon) ??
+			getGameCoverUrl(fallbackGameId)
+		);
+	};
+
+	const handleSetCoverForTarget = async (target: CollectionMenuTarget) => {
+		const collectionId = getCollectionIdFromTarget(target);
+		if (!collectionId) return;
+
+		try {
+			const imagePath = await selectCollectionCoverFile();
+			if (!imagePath) return;
+
+			const icon = await uploadSelectedCollectionCover(
+				collectionId,
+				imagePath,
+				target.icon,
+			);
+			await updateCollectionCoverMutation.mutateAsync({ collectionId, icon });
+			snackbar.success(
+				t("pages.Collection.success.coverUpdated", {
+					defaultValue: "封面已更新",
+				}),
+			);
+		} catch (error) {
+			snackbar.error(
+				t("pages.Collection.errors.coverUpdateFailed", {
+					defaultValue: "更新封面失败：{{error}}",
+					error: getUserErrorMessage(error, t),
+				}),
+			);
+		}
+	};
+
+	const handleResetCoverForTarget = async (target: CollectionMenuTarget) => {
+		const collectionId = getCollectionIdFromTarget(target);
+		if (!collectionId || !target.icon) return;
+
+		try {
+			await updateCollectionCoverMutation.mutateAsync({
+				collectionId,
+				icon: null,
+			});
+			try {
+				await deleteCollectionCustomCover(collectionId, target.icon);
+			} catch (error) {
+				console.warn("删除收藏夹自定义封面失败:", error);
+			}
+			snackbar.success(
+				t("pages.Collection.success.coverReset", {
+					defaultValue: "已恢复默认封面",
+				}),
+			);
+		} catch (error) {
+			snackbar.error(
+				t("pages.Collection.errors.coverResetFailed", {
+					defaultValue: "恢复默认封面失败：{{error}}",
+					error: getUserErrorMessage(error, t),
+				}),
+			);
+		}
+	};
 
 	const getLevelKey = (
 		groupId: string | null,
@@ -337,6 +440,7 @@ export const Collection: React.FC = () => {
 		e: React.MouseEvent,
 		groupId: string,
 		groupName: string,
+		icon?: string | null,
 	) => {
 		setMenuPosition({
 			mouseX: e.clientX,
@@ -344,11 +448,13 @@ export const Collection: React.FC = () => {
 			type: "group",
 			id: groupId,
 			name: groupName,
+			icon,
 		});
 		setSelectedItem({
 			type: "group",
 			id: groupId,
 			name: groupName,
+			icon,
 		});
 	};
 
@@ -359,6 +465,7 @@ export const Collection: React.FC = () => {
 		e: React.MouseEvent,
 		categoryId: number,
 		categoryName: string,
+		icon?: string | null,
 	) => {
 		setMenuPosition({
 			mouseX: e.clientX,
@@ -366,11 +473,13 @@ export const Collection: React.FC = () => {
 			type: "category",
 			id: categoryId,
 			name: categoryName,
+			icon,
 		});
 		setSelectedItem({
 			type: "category",
 			id: categoryId,
 			name: categoryName,
+			icon,
 		});
 	};
 
@@ -391,6 +500,20 @@ export const Collection: React.FC = () => {
 		setMenuPosition(null); // 关闭右键菜单
 
 		setManageGamesDialogOpen(true);
+	};
+
+	const handleOpenSetCover = () => {
+		if (!selectedItem) return;
+		const target = selectedItem;
+		setMenuPosition(null);
+		void handleSetCoverForTarget(target);
+	};
+
+	const handleOpenResetCover = () => {
+		if (!selectedItem) return;
+		const target = selectedItem;
+		setMenuPosition(null);
+		void handleResetCoverForTarget(target);
 	};
 
 	/**
@@ -541,6 +664,22 @@ export const Collection: React.FC = () => {
 
 	const renderCategoryCard = (category: CategoryType) => {
 		const isVirtual = virtualCategories.isVirtual(category.id);
+		const fallbackGameId = isVirtual
+			? getDeveloperCategoryGameIds(
+					category.virtualKey ?? category.name,
+					gameIndex,
+				)[0]
+			: category.first_game_id;
+		const coverUrl = isVirtual
+			? getGameCoverUrl(fallbackGameId)
+			: getCollectionCoverUrl(category.id, category.icon, fallbackGameId);
+		const categoryTarget: CollectionMenuTarget = {
+			type: "category",
+			id: category.id,
+			name: category.name,
+			icon: category.icon,
+		};
+
 		return (
 			<EntityCard
 				key={category.virtualKey ?? category.id}
@@ -550,14 +689,21 @@ export const Collection: React.FC = () => {
 					count: category.game_count,
 				}}
 				title={category.name}
+				coverUrl={coverUrl}
 				fillHeight={isVirtual}
 				titleNoWrap={isVirtual}
 				onClick={() => handleCategoryClick(category)}
+				onEditCover={
+					isVirtual ? undefined : () => handleSetCoverForTarget(categoryTarget)
+				}
+				editCoverTitle={t("pages.Collection.setCover", "设置封面")}
 				onDelete={
 					isVirtual ? undefined : (id) => handleDeleteCategory(id as number)
 				}
 				onContextMenu={(e, id, name) => {
-					if (!isVirtual) handleCategoryContextMenu(e, id as number, name);
+					if (!isVirtual) {
+						handleCategoryContextMenu(e, id as number, name, category.icon);
+					}
 				}}
 				showDelete={!isVirtual}
 				deleteTitle={t("pages.Collection.deleteCategoryTitle", "删除分类")}
@@ -578,12 +724,18 @@ export const Collection: React.FC = () => {
 		{
 			id: DefaultGroup.DEVELOPER,
 			name: t("pages.Collection.defaultGroups.developer", "开发商"),
+			icon: null,
+			count: displayAllGames.length,
+			first_game_id: displayAllGames[0]?.id ?? null,
 		},
 	];
 
 	const customGroups = groups.map((g) => ({
 		id: g.id.toString(),
 		name: g.name,
+		icon: g.icon ?? null,
+		count: groupCardInfo[g.id]?.game_count ?? 0,
+		first_game_id: groupCardInfo[g.id]?.first_game_id ?? null,
 	}));
 
 	const allGroups = [...defaultGroups, ...customGroups];
@@ -674,22 +826,47 @@ export const Collection: React.FC = () => {
 				>
 					{allGroups.map((group) => {
 						const isDefault = group.id.startsWith("default_");
+						const groupId = Number.parseInt(group.id, 10);
+						const groupTarget: CollectionMenuTarget = {
+							type: "group",
+							id: group.id,
+							name: group.name,
+							icon: group.icon,
+						};
+						const coverUrl =
+							isDefault || Number.isNaN(groupId)
+								? getGameCoverUrl(group.first_game_id)
+								: getCollectionCoverUrl(
+										groupId,
+										group.icon,
+										group.first_game_id,
+									);
+
 						return (
 							<EntityCard
 								key={group.id}
 								entity={{
 									id: group.id,
 									name: group.name,
-									count: groupGameCounts.get(group.id) || 0,
+									count: group.count,
 								}}
+								coverUrl={coverUrl}
 								onClick={() => handleGroupClick(group.id)}
+								onEditCover={
+									isDefault
+										? undefined
+										: () => handleSetCoverForTarget(groupTarget)
+								}
+								editCoverTitle={t("pages.Collection.setCover", "设置封面")}
 								onDelete={
 									isDefault
 										? undefined
 										: (id) => handleDeleteGroup(id as string)
 								}
 								onContextMenu={(e, id, name) => {
-									if (!isDefault) handleGroupContextMenu(e, id as string, name);
+									if (!isDefault) {
+										handleGroupContextMenu(e, id as string, name, group.icon);
+									}
 								}}
 								showDelete={!isDefault}
 								deleteTitle={t("pages.Collection.deleteGroupTitle", "删除分组")}
@@ -781,6 +958,9 @@ export const Collection: React.FC = () => {
 					}
 					onOpenRename={handleOpenRenameDialog}
 					onOpenManageGames={handleOpenManageGamesDialog}
+					onSetCover={handleOpenSetCover}
+					onResetCover={handleOpenResetCover}
+					hasCustomCover={Boolean(menuPosition.icon)}
 				/>
 			)}
 

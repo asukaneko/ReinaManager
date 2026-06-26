@@ -11,6 +11,7 @@
 export interface CollectionGroup {
 	id: number;
 	name: string;
+	icon?: string | null;
 	sort_order: number;
 }
 
@@ -20,13 +21,20 @@ export interface CollectionGroup {
 export interface CollectionCategory {
 	id: number;
 	name: string;
+	icon?: string | null;
 	virtualKey?: string;
 	sort_order: number;
 	game_count: number;
+	first_game_id?: number | null;
 }
 
 export type Group = CollectionGroup;
 export type Category = CollectionCategory;
+
+export interface CollectionGroupCardInfo {
+	game_count: number;
+	first_game_id?: number | null;
+}
 
 /**
  * 默认分组类型枚举

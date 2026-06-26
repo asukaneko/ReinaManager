@@ -8,11 +8,13 @@
 
 import DeleteIcon from "@mui/icons-material/Delete";
 import FolderIcon from "@mui/icons-material/Folder";
+import ImageIcon from "@mui/icons-material/Image";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardActionArea from "@mui/material/CardActionArea";
 import CardContent from "@mui/material/CardContent";
 import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import { memo, useState } from "react";
 import { AlertConfirmBox } from "@/components/AlertBox";
@@ -28,14 +30,20 @@ interface EntityCardProps {
 	onClick: () => void;
 	/** 悬停提示 */
 	title?: string;
+	/** 卡片封面 */
+	coverUrl?: string | null;
 	/** 是否撑满父容器高度 */
 	fillHeight?: boolean;
 	/** 是否单行省略标题 */
 	titleNoWrap?: boolean;
 	/** 删除回调 */
 	onDelete?: (id: string | number) => void;
+	/** 设置封面回调 */
+	onEditCover?: () => void;
+	/** 设置封面按钮提示 */
+	editCoverTitle?: string;
 	/** 右键菜单回调 */
-	onContextMenu: (
+	onContextMenu?: (
 		e: React.MouseEvent,
 		id: string | number,
 		name: string,
@@ -59,9 +67,12 @@ export const EntityCard = memo<EntityCardProps>(
 		entity,
 		onClick,
 		title,
+		coverUrl,
 		fillHeight = false,
 		titleNoWrap = false,
 		onDelete,
+		onEditCover,
+		editCoverTitle,
 		onContextMenu,
 		showDelete = true,
 		deleteTitle,
@@ -77,6 +88,11 @@ export const EntityCard = memo<EntityCardProps>(
 			setDeleteDialogOpen(true);
 		};
 
+		const handleEditCoverClick = (e: React.MouseEvent) => {
+			e.stopPropagation();
+			onEditCover?.();
+		};
+
 		const handleConfirmDelete = async () => {
 			if (!onDelete) return;
 			setIsDeleting(true);
@@ -89,6 +105,7 @@ export const EntityCard = memo<EntityCardProps>(
 		};
 
 		const handleContextMenu = (e: React.MouseEvent) => {
+			if (!onContextMenu) return;
 			e.preventDefault();
 			onContextMenu(e, entity.id, entity.name);
 		};
@@ -96,37 +113,96 @@ export const EntityCard = memo<EntityCardProps>(
 		return (
 			<Box
 				sx={{
-					p: 1,
 					position: "relative",
 					...(fillHeight && { boxSizing: "border-box", height: "100%" }),
 				}}
 			>
 				<Card
+					className="group overflow-hidden"
 					onContextMenu={handleContextMenu}
-					sx={fillHeight ? { height: "100%" } : undefined}
 				>
 					<CardActionArea
 						onClick={onClick}
 						title={title}
-						sx={fillHeight ? { height: "100%" } : undefined}
+						sx={{
+							display: "flex",
+							flexDirection: "column",
+							alignItems: "stretch",
+						}}
 					>
-						<CardContent sx={fillHeight ? { height: "100%" } : undefined}>
-							<Box display="flex" alignItems="center" gap={1} mb={1}>
-								<FolderIcon color="primary" />
-								<Typography
-									variant="h6"
-									component="div"
-									noWrap={titleNoWrap}
-									sx={titleNoWrap ? { minWidth: 0 } : undefined}
+						<Box className="relative aspect-[3/4] w-full overflow-hidden">
+							{coverUrl ? (
+								<Box
+									component="img"
+									src={coverUrl}
+									alt={entity.name}
+									draggable="false"
+									loading="lazy"
+									className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-103"
+								/>
+							) : (
+								<Box
+									className="h-full w-full flex items-center justify-center"
+									sx={{
+										bgcolor: "action.hover",
+										color: "text.secondary",
+									}}
 								>
-									{entity.name}
-								</Typography>
-							</Box>
+									<FolderIcon sx={{ fontSize: 46, opacity: 0.72 }} />
+								</Box>
+							)}
+							<Box className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/55 to-transparent" />
+						</Box>
+						<CardContent
+							sx={{
+								flexShrink: 0,
+								minWidth: 0,
+								px: 2,
+								py: 1.5,
+								"&:last-child": { pb: 1.5 },
+							}}
+						>
+							<Typography
+								variant="subtitle1"
+								component="div"
+								noWrap={titleNoWrap}
+								sx={titleNoWrap ? { minWidth: 0 } : undefined}
+							>
+								{entity.name}
+							</Typography>
 							<Typography variant="body2" color="text.secondary">
 								{entity.count} {countLabel}
 							</Typography>
 						</CardContent>
 					</CardActionArea>
+					{onEditCover && (
+						<Tooltip title={editCoverTitle ?? ""} enterDelay={600}>
+							<IconButton
+								sx={{
+									position: "absolute",
+									top: 8,
+									left: 8,
+									zIndex: 2,
+									bgcolor: "background.paper",
+									color: "text.primary",
+									opacity: 0,
+									boxShadow: 1,
+									transition: "opacity 120ms ease",
+									".group:hover &": {
+										opacity: 1,
+									},
+									"&:hover": {
+										bgcolor: "primary.main",
+										color: "primary.contrastText",
+									},
+								}}
+								size="small"
+								onClick={handleEditCoverClick}
+							>
+								<ImageIcon fontSize="small" />
+							</IconButton>
+						</Tooltip>
+					)}
 					{canDelete && (
 						<IconButton
 							sx={{

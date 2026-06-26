@@ -3,7 +3,11 @@
  * @description 封装所有合集相关的后端调用
  */
 
-import type { CollectionCategory, CollectionGroup } from "@/types/collection";
+import type {
+	CollectionCategory,
+	CollectionGroup,
+	CollectionGroupCardInfo,
+} from "@/types/collection";
 import { BaseService } from "./base";
 
 class CollectionService extends BaseService {
@@ -14,11 +18,13 @@ class CollectionService extends BaseService {
 		name: string,
 		parentId: number | null = null,
 		sortOrder: number = 0,
+		icon: string | null = null,
 	): Promise<CollectionGroup> {
 		return this.invoke<CollectionGroup>("create_collection", {
 			name,
 			parentId,
 			sortOrder,
+			icon,
 		});
 	}
 
@@ -36,6 +42,16 @@ class CollectionService extends BaseService {
 			name: name || null,
 			parentId: parentId !== undefined ? parentId : null,
 			sortOrder: sortOrder ?? null,
+		});
+	}
+
+	async updateCollectionCover(
+		id: number,
+		icon: string | null,
+	): Promise<CollectionGroup> {
+		return this.invoke<CollectionGroup>("update_collection_icon", {
+			id,
+			icon,
 		});
 	}
 
@@ -125,6 +141,15 @@ class CollectionService extends BaseService {
 		return this.invoke<Record<number, number>>("batch_count_games_in_groups", {
 			groupIds,
 		});
+	}
+
+	async batchGetGroupCardInfo(
+		groupIds: number[],
+	): Promise<Record<number, CollectionGroupCardInfo>> {
+		return this.invoke<Record<number, CollectionGroupCardInfo>>(
+			"batch_get_group_card_info",
+			{ groupIds },
+		);
 	}
 
 	/**
