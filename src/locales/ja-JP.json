@@ -577,6 +577,60 @@
 		"Libraries": {
 			"empty": "条件に一致するゲームが見つかりません"
 		},
+		"Statistics": {
+			"chart": {
+				"playMinutes": "分"
+			},
+			"empty": {
+				"noData": "データなし",
+				"noNeverPlayed": "すべてのゲームにプレイ記録があります",
+				"noPlayed": "プレイ記録なし",
+				"noStale": "長期間プレイしていないゲームはありません"
+			},
+			"heatmap": {
+				"less": "少",
+				"more": "多"
+			},
+			"metrics": {
+				"activeDays": "アクティブ日数",
+				"activeGames_other": "アクティブなゲーム {{count}} 本",
+				"avgPerActive": "アクティブゲーム平均 {{time}}",
+				"completed": "完了",
+				"completedGames": "完了",
+				"completionRate": "完了率",
+				"gameCount_other": "{{count}} 本のゲーム",
+				"gamesSuffix": " 本",
+				"local": "ローカル",
+				"longestStreak": "最長 {{count}} 日",
+				"monthPlayTime": "今月のプレイ時間",
+				"onlineOnly": "クラウドのみ",
+				"streak": "連続日数",
+				"todayPlayTime": "今日のプレイ時間",
+				"totalGames": "総ゲーム数",
+				"totalPlayTime": "累計プレイ時間",
+				"week": "今週",
+				"withLocalPath": "ローカルパス"
+			},
+			"sections": {
+				"developers": "開発者",
+				"heatmap": "活動ヒートマップ",
+				"libraryHealth": "ライブラリ構成",
+				"longUnplayed": "長期未プレイ",
+				"neverPlayed": "未プレイ",
+				"playStatus": "プレイ状況",
+				"recentlyPlayed": "最近プレイ",
+				"sources": "データソース",
+				"tags": "人気タグ",
+				"topPlayed": "プレイ時間ランキング",
+				"trend": "過去 30 日"
+			},
+			"source": {
+				"custom": "カスタム",
+				"mixed": "混合",
+				"unknown": "不明"
+			},
+			"title": "統計"
+		},
 		"Settings": {
 			"about": {
 				"author": "作者",

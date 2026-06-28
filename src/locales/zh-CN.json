@@ -577,6 +577,60 @@
 		"Libraries": {
 			"empty": "没有找到符合条件的游戏"
 		},
+		"Statistics": {
+			"chart": {
+				"playMinutes": "分钟"
+			},
+			"empty": {
+				"noData": "暂无数据",
+				"noNeverPlayed": "所有游戏都有游玩记录",
+				"noPlayed": "暂无游玩记录",
+				"noStale": "没有久未游玩的游戏"
+			},
+			"heatmap": {
+				"less": "少",
+				"more": "多"
+			},
+			"metrics": {
+				"activeDays": "活跃天数",
+				"activeGames_other": "{{count}} 款活跃游戏",
+				"avgPerActive": "活跃游戏平均 {{time}}",
+				"completed": "已完成",
+				"completedGames": "已完成",
+				"completionRate": "完成率",
+				"gameCount_other": "{{count}} 款游戏",
+				"gamesSuffix": " 款游戏",
+				"local": "本地",
+				"longestStreak": "最长 {{count}} 天",
+				"monthPlayTime": "本月时长",
+				"onlineOnly": "仅云端",
+				"streak": "连续天数",
+				"todayPlayTime": "今日时长",
+				"totalGames": "游戏总数",
+				"totalPlayTime": "累计时长",
+				"week": "本周",
+				"withLocalPath": "本地路径"
+			},
+			"sections": {
+				"developers": "开发商",
+				"heatmap": "活动热力图",
+				"libraryHealth": "库概况",
+				"longUnplayed": "久未游玩",
+				"neverPlayed": "从未游玩",
+				"playStatus": "游玩状态",
+				"recentlyPlayed": "最近在玩",
+				"sources": "数据来源",
+				"tags": "热门标签",
+				"topPlayed": "游玩时长榜",
+				"trend": "近 30 天"
+			},
+			"source": {
+				"custom": "自定义",
+				"mixed": "混合",
+				"unknown": "未知"
+			},
+			"title": "统计"
+		},
 		"Settings": {
 			"about": {
 				"author": "作者",

@@ -577,6 +577,60 @@
 		"Libraries": {
 			"empty": "沒有找到符合條件的遊戲"
 		},
+		"Statistics": {
+			"chart": {
+				"playMinutes": "分鐘"
+			},
+			"empty": {
+				"noData": "暫無資料",
+				"noNeverPlayed": "所有遊戲都有遊玩紀錄",
+				"noPlayed": "暫無遊玩紀錄",
+				"noStale": "沒有久未遊玩的遊戲"
+			},
+			"heatmap": {
+				"less": "少",
+				"more": "多"
+			},
+			"metrics": {
+				"activeDays": "活躍天數",
+				"activeGames_other": "{{count}} 款活躍遊戲",
+				"avgPerActive": "活躍遊戲平均 {{time}}",
+				"completed": "已完成",
+				"completedGames": "已完成",
+				"completionRate": "完成率",
+				"gameCount_other": "{{count}} 款遊戲",
+				"gamesSuffix": " 款遊戲",
+				"local": "本機",
+				"longestStreak": "最長 {{count}} 天",
+				"monthPlayTime": "本月時長",
+				"onlineOnly": "僅雲端",
+				"streak": "連續天數",
+				"todayPlayTime": "今日時長",
+				"totalGames": "遊戲總數",
+				"totalPlayTime": "累計時長",
+				"week": "本週",
+				"withLocalPath": "本機路徑"
+			},
+			"sections": {
+				"developers": "開發商",
+				"heatmap": "活動熱力圖",
+				"libraryHealth": "庫概況",
+				"longUnplayed": "久未遊玩",
+				"neverPlayed": "從未遊玩",
+				"playStatus": "遊玩狀態",
+				"recentlyPlayed": "最近在玩",
+				"sources": "資料來源",
+				"tags": "熱門標籤",
+				"topPlayed": "遊玩時長榜",
+				"trend": "近 30 天"
+			},
+			"source": {
+				"custom": "自訂",
+				"mixed": "混合",
+				"unknown": "未知"
+			},
+			"title": "統計"
+		},
 		"Settings": {
 			"about": {
 				"author": "作者",

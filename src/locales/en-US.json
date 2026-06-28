@@ -590,6 +590,62 @@
 		"Libraries": {
 			"empty": "No matching games found"
 		},
+		"Statistics": {
+			"chart": {
+				"playMinutes": "Minutes"
+			},
+			"empty": {
+				"noData": "No data",
+				"noNeverPlayed": "Every game has a play record",
+				"noPlayed": "No play records",
+				"noStale": "No stale games"
+			},
+			"heatmap": {
+				"less": "Less",
+				"more": "More"
+			},
+			"metrics": {
+				"activeDays": "active days",
+				"activeGames_one": "{{count}} active game",
+				"activeGames_other": "{{count}} active games",
+				"avgPerActive": "Avg {{time}} / active game",
+				"completed": "Completed",
+				"completedGames": "Completed",
+				"completionRate": "Completed",
+				"gameCount_one": "{{count}} game",
+				"gameCount_other": "{{count}} games",
+				"gamesSuffix": " games",
+				"local": "local",
+				"longestStreak": "Longest {{count}} days",
+				"monthPlayTime": "This Month",
+				"onlineOnly": "Cloud Only",
+				"streak": "Streak",
+				"todayPlayTime": "Today",
+				"totalGames": "Total Games",
+				"totalPlayTime": "Total Play Time",
+				"week": "Week",
+				"withLocalPath": "Local Path"
+			},
+			"sections": {
+				"developers": "Developers",
+				"heatmap": "Activity Heatmap",
+				"libraryHealth": "Library Mix",
+				"longUnplayed": "Long Unplayed",
+				"neverPlayed": "Never Played",
+				"playStatus": "Play Status",
+				"recentlyPlayed": "Recently Played",
+				"sources": "Data Sources",
+				"tags": "Top Tags",
+				"topPlayed": "Top Played",
+				"trend": "Last 30 Days"
+			},
+			"source": {
+				"custom": "Custom",
+				"mixed": "Mixed",
+				"unknown": "Unknown"
+			},
+			"title": "Statistics"
+		},
 		"Settings": {
 			"about": {
 				"author": "Author",

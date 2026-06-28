@@ -640,15 +640,15 @@ function SimpleGameList({ title, games, emptyText }: SimpleGameListProps) {
 function getHeatmapColor(level: number, theme: Theme): string {
 	switch (level) {
 		case 1:
-			return alpha(theme.palette.success.light, 0.45);
+			return alpha(theme.palette.success.light, 0.35);
 		case 2:
-			return theme.palette.success.light;
+			return alpha(theme.palette.success.light, 0.65);
 		case 3:
-			return theme.palette.success.main;
+			return theme.palette.success.light;
 		case 4:
-			return theme.palette.success.dark;
+			return theme.palette.success.main;
 		default:
-			return theme.palette.action.hover;
+			return alpha(theme.palette.text.primary, 0.08);
 	}
 }
 
@@ -848,7 +848,7 @@ export const Statistics: React.FC = () => {
 								<Box
 									className="grid grid-flow-col grid-rows-7 gap-1 mt-4 overflow-x-auto pb-1"
 									sx={{
-										gridAutoColumns: 14,
+										gridAutoColumns: 16,
 									}}
 								>
 									{analytics.heatmapCells.map((cell) => (
@@ -857,11 +857,16 @@ export const Statistics: React.FC = () => {
 											title={`${cell.date} / ${formatPlayTime(cell.minutes)}`}
 										>
 											<Box
-												className="rounded-sm"
+												className="rounded-sm transition-colors"
 												sx={{
-													width: 12,
-													height: 12,
+													width: 14,
+													height: 14,
 													backgroundColor: getHeatmapColor(cell.level, theme),
+													border: `1px solid ${alpha(theme.palette.text.primary, cell.level === 0 ? 0.12 : 0)}`,
+													"&:hover": {
+														outline: `1px solid ${theme.palette.primary.main}`,
+														outlineOffset: 1,
+													},
 												}}
 											/>
 										</Tooltip>
@@ -869,8 +874,10 @@ export const Statistics: React.FC = () => {
 								</Box>
 								<Stack
 									direction="row"
+									alignItems="center"
 									justifyContent="space-between"
-									className="mt-4"
+									className="mt-3"
+									spacing={1}
 								>
 									<Typography variant="body2" color="text.secondary">
 										{t("pages.Statistics.metrics.activeGames", {
@@ -887,6 +894,40 @@ export const Statistics: React.FC = () => {
 									value={analytics.activeRate * 100}
 									sx={{ mt: 1, height: 8, borderRadius: 1 }}
 								/>
+								<Stack
+									direction="row"
+									alignItems="center"
+									justifyContent="flex-end"
+									spacing={0.5}
+									className="mt-2"
+								>
+									<Typography
+										variant="caption"
+										color="text.secondary"
+										sx={{ mr: 0.5 }}
+									>
+										{t("pages.Statistics.heatmap.less", "Less")}
+									</Typography>
+									{[0, 1, 2, 3, 4].map((level) => (
+										<Box
+											key={level}
+											sx={{
+												width: 10,
+												height: 10,
+												borderRadius: 0.5,
+												backgroundColor: getHeatmapColor(level, theme),
+												border: `1px solid ${alpha(theme.palette.text.primary, level === 0 ? 0.12 : 0)}`,
+											}}
+										/>
+									))}
+									<Typography
+										variant="caption"
+										color="text.secondary"
+										sx={{ ml: 0.5 }}
+									>
+										{t("pages.Statistics.heatmap.more", "More")}
+									</Typography>
+								</Stack>
 							</CardContent>
 						</Card>
 					</Box>
