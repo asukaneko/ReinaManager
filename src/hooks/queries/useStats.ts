@@ -94,6 +94,13 @@ function usePlayTimeSummaryQuery() {
 	});
 }
 
+function useAllGameStatisticsMap() {
+	return useQuery({
+		queryKey: statsKeys.all,
+		queryFn: getAllGameStatistics,
+	});
+}
+
 function useGameStats(gameId: number | null) {
 	return useQuery({
 		queryKey: statsKeys.gameStats(gameId ?? 0),
@@ -194,6 +201,7 @@ function usePlayTimeSummary() {
 
 export {
 	useAllGameLastPlayedMap,
+	useAllGameStatisticsMap,
 	useGameSessions,
 	useGameStats,
 	usePlayTimeSummary,
