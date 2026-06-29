@@ -846,9 +846,12 @@ export const Statistics: React.FC = () => {
 									</Typography>
 								</Stack>
 								<Box
-									className="grid grid-flow-col grid-rows-7 gap-1 mt-4 overflow-x-auto pb-1"
+									className="grid grid-flow-col grid-rows-7 gap-1 mt-4 pb-1"
 									sx={{
-										gridAutoColumns: 16,
+										gridTemplateColumns: `repeat(${Math.max(
+											1,
+											Math.ceil(analytics.heatmapCells.length / 7),
+										)}, minmax(0, 1fr))`,
 									}}
 								>
 									{analytics.heatmapCells.map((cell) => (
@@ -859,8 +862,9 @@ export const Statistics: React.FC = () => {
 											<Box
 												className="rounded-sm transition-colors"
 												sx={{
-													width: 14,
-													height: 14,
+													width: "100%",
+													aspectRatio: "1 / 1",
+													minWidth: 0,
 													backgroundColor: getHeatmapColor(cell.level, theme),
 													border: `1px solid ${alpha(theme.palette.text.primary, cell.level === 0 ? 0.12 : 0)}`,
 													"&:hover": {
