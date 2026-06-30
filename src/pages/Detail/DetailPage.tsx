@@ -357,17 +357,19 @@ export const Detail: React.FC = () => {
 									</Box>
 									{typeof selectedGame.rank === "number" &&
 										selectedGame.rank > 0 && (
-										<Box>
-											<Typography
-												variant="subtitle2"
-												fontWeight="bold"
-												component="div"
-											>
-												{t("pages.Detail.gameRanking", "游戏排行")}
-											</Typography>
-											<Typography component="div">{selectedGame.rank}</Typography>
-										</Box>
-									)}
+											<Box>
+												<Typography
+													variant="subtitle2"
+													fontWeight="bold"
+													component="div"
+												>
+													{t("pages.Detail.gameRanking", "游戏排行")}
+												</Typography>
+												<Typography component="div">
+													{selectedGame.rank}
+												</Typography>
+											</Box>
+										)}
 									{selectedGame.average_hours !== 0 &&
 										selectedGame.average_hours && (
 											<Box>
@@ -393,7 +395,11 @@ export const Detail: React.FC = () => {
 											>
 												{t("pages.Detail.score", "评分")}
 											</Typography>
-											<Stack direction="row" spacing={0.75} className="flex-wrap">
+											<Stack
+												direction="row"
+												spacing={0.75}
+												className="flex-wrap"
+											>
 												{hasRating(selectedGame.score) && (
 													<Chip
 														size="small"
